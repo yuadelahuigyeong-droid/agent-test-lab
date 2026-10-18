@@ -1,13 +1,9 @@
 import express from "express";
+import { searchCustomers } from "./agents/searchAgent.js";
+import { validateCustomers } from "./agents/validatorAgent.js";
 
 const app = express();
 const PORT = 3001;
-
-const customers = [
-  { id: "C001", name: "田中太郎" },
-  { id: "C002", name: "佐藤花子" },
-  { id: "C003", name: "鈴木一郎" },
-];
 
 app.get("/", (req, res) => {
   res.send("Agent Test Lab API is running!");
@@ -16,9 +12,17 @@ app.get("/", (req, res) => {
 app.get("/api/customers", (req, res) => {
   const keyword = String(req.query.name ?? "").trim();
 
-  const results = customers.filter((customer) =>
-    customer.name.includes(keyword),
-  );
+  // Step 1: Search Agent
+  const results = searchCustomers(keyword);
+
+  // Step 2: Validator Agent
+  const isValid = validateCustomers(results);
+
+  if (!isValid) {
+    return res.status(500).json({
+      error: "Customer data validation failed",
+    });
+  }
 
   res.json(results);
 });
