@@ -1,20 +1,33 @@
 import { useState } from "react";
 
-const customers = [
-  { id: "C001", name: "田中太郎" },
-  { id: "C002", name: "佐藤花子" },
-  { id: "C003", name: "鈴木一郎" },
-];
+type Customer = {
+  id: string;
+  name: string;
+};
 
 function App() {
   const [keyword, setKeyword] = useState("");
-  const [results, setResults] = useState<typeof customers>([]);
+  const [results, setResults] = useState<Customer[]>([]);
+  const [error, setError] = useState("");
 
-  const handleSearch = () => {
-    const filtered = customers.filter((customer) =>
-      customer.name.includes(keyword.trim()),
-    );
-    setResults(filtered);
+  const handleSearch = async () => {
+    setError("");
+
+    try {
+      const response = await fetch(
+        `/api/customers?name=${encodeURIComponent(keyword.trim())}`,
+      );
+
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
+
+      const data: Customer[] = await response.json();
+      setResults(data);
+    } catch {
+      setResults([]);
+      setError("検索中にエラーが発生しました。");
+    }
   };
 
   return (
@@ -32,7 +45,9 @@ function App() {
 
       <h2>検索結果</h2>
 
-      {results.length === 0 ? (
+      {error ? (
+        <p>{error}</p>
+      ) : results.length === 0 ? (
         <p>検索結果がありません。</p>
       ) : (
         <ul>
