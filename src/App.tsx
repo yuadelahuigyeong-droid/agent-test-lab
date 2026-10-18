@@ -20,7 +20,9 @@ function App() {
       );
 
       if (!response.ok) {
-        throw new Error("API request failed");
+        const errorData = await response.json();
+        setLogs(errorData.logs ?? []);
+        throw new Error(errorData.error ?? "Search failed");
       }
 
       const data = await response.json();
