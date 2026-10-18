@@ -9,6 +9,7 @@ function App() {
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState<Customer[]>([]);
   const [error, setError] = useState("");
+  const [logs, setLogs] = useState<string[]>([]);
 
   const handleSearch = async () => {
     setError("");
@@ -22,8 +23,9 @@ function App() {
         throw new Error("API request failed");
       }
 
-      const data: Customer[] = await response.json();
-      setResults(data);
+      const data = await response.json();
+      setResults(data.customers);
+      setLogs(data.logs);
     } catch {
       setResults([]);
       setError("検索中にエラーが発生しました。");
@@ -58,6 +60,14 @@ function App() {
           ))}
         </ul>
       )}
+      <section>
+        <h2>エージェント実行ログ</h2>
+        <ul>
+          {logs.map((log, index) => (
+            <li key={index}>{log}</li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }
